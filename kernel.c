@@ -1,11 +1,12 @@
 #include "stm32f10x.h"
 #include "RTOSConfig.h"
 
+#include "String.h"
 #include "syscall.h"
 
 #include <stddef.h>
 
-#include "String.h"
+
 
 void *memcpy(void *dest, const void *src, size_t n);
 
@@ -625,7 +626,8 @@ void show_task_info(int argc, char* argv[])
 		task_info_status[0]='0'+tasks[task_i].status;
 		task_info_status[1]='\0';			
 
-		itoa(tasks[task_i].priority, task_info_priority, 10);
+		//itoa(tasks[task_i].priority, task_info_priority, 10);
+		itoa(tasks[task_i].priority, task_info_priority);
 
 		write(fdout, &task_info_pid , 2);
 		write_blank(3);
@@ -638,7 +640,7 @@ void show_task_info(int argc, char* argv[])
 }
 
 //this function helps to show int
-
+/*
 void itoa(int n, char *dst, int base)
 {
 	char buf[33] = {0};
@@ -658,7 +660,7 @@ void itoa(int n, char *dst, int base)
 
 	strcpy(dst, p);
 }
-
+*/
 //help
 
 void show_cmd_info(int argc, char* argv[])
