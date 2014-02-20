@@ -28,6 +28,17 @@ int strncmp(const char *a, const char *b, size_t n)
 	return 0;
 }
 
+/*
+size_t strlen(const char *string)
+{
+    size_t chars = 0;
+
+    while(*string++) {
+        chars++;
+    }
+    return chars;
+}
+*/
 size_t strlen(const char *s) __attribute__ ((naked));
 size_t strlen(const char *s)
 {

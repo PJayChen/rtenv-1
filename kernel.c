@@ -5,7 +5,7 @@
 #include "syscall.h"
 
 #include <stddef.h>
-
+#include <myio.h>
 
 
 void *memcpy(void *dest, const void *src, size_t n);
@@ -398,31 +398,36 @@ void serial_test_task()
 	int hint_length = sizeof(hint);
 	char *p = NULL;
 	int cmd_count = 0;
-
+	char q[2] = {'q','\0'};
 	fdout = mq_open("/tmp/mqueue/out", 0);
 	fdin = open("/dev/tty0/in", 0);
 
 	for (;; cur_his = (cur_his + 1) % HISTORY_COUNT) {
 		p = cmd[cur_his];
-		write(fdout, hint, hint_length);
+		
+		//write(fdout, hint, hint_length);
+		fdprintf(fdout, "%s", hint);
 
 		while (1) {
 			read(fdin, put_ch, 1);
 
 			if (put_ch[0] == '\r' || put_ch[0] == '\n') {
 				*p = '\0';
-				write(fdout, next_line, 3);
+				fdprintf(fdout, "%s", next_line);
+				//write(fdout, next_line, 3);
 				break;
 			}
 			else if (put_ch[0] == 127 || put_ch[0] == '\b') {
 				if (p > cmd[cur_his]) {
 					p--;
-					write(fdout, "\b \b", 4);
+					fdprintf(fdout, "\b \b");
+					//write(fdout, "\b \b", 4);
 				}
 			}
 			else if (p - cmd[cur_his] < CMDBUF_SIZE - 1) {
 				*p++ = put_ch[0];
-				write(fdout, put_ch, 2);
+				fdprintf(fdout, "%s", put_ch);
+				//write(fdout, put_ch, 2);
 			}
 		}
 		check_keyword();	
@@ -495,9 +500,14 @@ void check_keyword()
 		}
 	}
 	if (i == CMD_COUNT) {
+		fdprintf(fdout, "%s", argv[0]);
+		fdprintf(fdout, ": command not found");
+		fdprintf(fdout, "%s", next_line);
+		/*
 		write(fdout, argv[0], strlen(argv[0]) + 1);
 		write(fdout, ": command not found", 20);
 		write(fdout, next_line, 3);
+		*/
 	}
 }
 

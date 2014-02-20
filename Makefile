@@ -14,7 +14,7 @@ CMSIS_PLAT_SRC = $(CMSIS_LIB)/DeviceSupport/$(VENDOR)/$(PLAT)
 
 all: main.bin
 
-main.bin: kernel.c context_switch.s syscall.s syscall.h
+main.bin: kernel.c context_switch.s syscall.s syscall.h String.h myio.h
 	$(CROSS_COMPILE)gcc \
 		-DUSER_NAME=\"$(USER)\" \
 		-Wl,-Tmain.ld -nostartfiles \
@@ -41,7 +41,10 @@ main.bin: kernel.c context_switch.s syscall.s syscall.h
 		syscall.s \
 		stm32_p103.c \
 		kernel.c \
-		memcpy.s
+		memcpy.s \
+		String.c \
+                myio.c
+
 	$(CROSS_COMPILE)objcopy -Obinary main.elf main.bin
 	$(CROSS_COMPILE)objdump -S main.elf > main.list
 
