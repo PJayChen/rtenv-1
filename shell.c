@@ -21,6 +21,9 @@ int fdout;
 int fdin;
 extern size_t task_count;
 
+/*Functions*/
+void check_keyword(void);
+void find_events(void);
 
 /* Command handlers. */
 void export_envvar(int argc, char *argv[]);
@@ -138,7 +141,7 @@ char *cmdtok(char *cmd)
 	return cur;
 }
 
-void check_keyword()
+void check_keyword(void)
 {
 	char *argv[MAX_ARGC + 1] = {NULL};
 	char cmdstr[CMDBUF_SIZE];
@@ -186,7 +189,7 @@ void check_keyword()
 	}
 }
 
-void find_events()
+void find_events(void)
 {
 	char buf[CMDBUF_SIZE];
 	char *p = cmd[cur_his];
