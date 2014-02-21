@@ -79,33 +79,29 @@ void vShell_task()
 	char q[2] = {'q','\0'};
 	fdout = mq_open("/tmp/mqueue/out", 0);
 	fdin = open("/dev/tty0/in", 0);
-
+	
 	for (;; cur_his = (cur_his + 1) % HISTORY_COUNT) {
 		p = cmd[cur_his];
 		
-		//write(fdout, hint, hint_length);
-		fdprintf(fdout, "%s", hint);
+		printf("%s", hint);
 
 		while (1) {
 			read(fdin, put_ch, 1);
 
 			if (put_ch[0] == '\r' || put_ch[0] == '\n') {
 				*p = '\0';
-				fdprintf(fdout, "%s", next_line);
-				//write(fdout, next_line, 3);
+				printf("%s", next_line);
 				break;
 			}
 			else if (put_ch[0] == 127 || put_ch[0] == '\b') {
 				if (p > cmd[cur_his]) {
 					p--;
-					fdprintf(fdout, "\b \b");
-					//write(fdout, "\b \b", 4);
+					printf("\b \b");
 				}
 			}
 			else if (p - cmd[cur_his] < CMDBUF_SIZE - 1) {
 				*p++ = put_ch[0];
-				fdprintf(fdout, "%s", put_ch);
-				//write(fdout, put_ch, 2);
+				printf("%s", put_ch);
 			}
 		}
 		check_keyword();	
@@ -293,8 +289,7 @@ void export_envvar(int argc, char *argv[])
 	}
 }
 
-//ps
-
+/*Command Function: ps*/
 void show_task_info(int argc, char* argv[])
 {
 	char ps_message[]="PID STATUS PRIORITY";
@@ -302,8 +297,7 @@ void show_task_info(int argc, char* argv[])
 	int task_i;
 	int task;
 
-	write(fdout, &ps_message , ps_message_length);
-	write(fdout, &next_line , 3);
+	printf("%s\n", ps_message);
 
 	for (task_i = 0; task_i < task_count; task_i++) {
 		char task_info_pid[2];
@@ -315,36 +309,28 @@ void show_task_info(int argc, char* argv[])
 		task_info_status[0]='0'+tasks[task_i].status;
 		task_info_status[1]='\0';			
 
-		//itoa(tasks[task_i].priority, task_info_priority, 10);
 		itoa(tasks[task_i].priority, task_info_priority);
 
-		write(fdout, &task_info_pid , 2);
-		write_blank(3);
-			write(fdout, &task_info_status , 2);
-		write_blank(5);
-		write(fdout, &task_info_priority , 3);
-
-		write(fdout, &next_line , 3);
+		printf("%s   %s     %s\n", task_info_pid, task_info_status, task_info_priority);
+	
 	}
 }
 
 
-//help
+/*Command Function: help*/
 void show_cmd_info(int argc, char* argv[])
 {
 	const char help_desp[] = "This system has commands as follow\n\r\0";
 	int i;
 
-	write(fdout, &help_desp, sizeof(help_desp));
+	printf("%s", help_desp);
+	
 	for (i = 0; i < CMD_COUNT; i++) {
-		write(fdout, cmd_data[i].cmd, strlen(cmd_data[i].cmd) + 1);
-		write(fdout, ": ", 3);
-		write(fdout, cmd_data[i].description, strlen(cmd_data[i].description) + 1);
-		write(fdout, next_line, 3);
+		printf("%s: %s\n", cmd_data[i].cmd, cmd_data[i].description);
 	}
 }
 
-//echo
+/*Command Function: echo*/
 void show_echo(int argc, char* argv[])
 {
 	const int _n = 1; /* Flag for "-n" option. */
@@ -359,16 +345,19 @@ void show_echo(int argc, char* argv[])
 	}
 
 	for (; i < argc; i++) {
-		write(fdout, argv[i], strlen(argv[i]) + 1);
+		printf("%s", argv[i]);
+		//write(fdout, argv[i], strlen(argv[i]) + 1);
 		if (i < argc - 1)
-			write(fdout, " ", 2);
+			printf(" "); 
+			//write(fdout, " ", 2);
 	}
 
 	if (~flag & _n)
-		write(fdout, next_line, 3);
+		printf("\n");
+		//write(fdout, next_line, 3);
 }
 
-//man
+/*Command Function: man*/
 void show_man_page(int argc, char *argv[])
 {
 	int i;
@@ -382,33 +371,17 @@ void show_man_page(int argc, char *argv[])
 	if (i >= CMD_COUNT)
 		return;
 
-	write(fdout, "NAME: ", 7);
-	write(fdout, cmd_data[i].cmd, strlen(cmd_data[i].cmd) + 1);
-	write(fdout, next_line, 3);
-	write(fdout, "DESCRIPTION: ", 14);
-	write(fdout, cmd_data[i].description, strlen(cmd_data[i].description) + 1);
-	write(fdout, next_line, 3);
+	printf("NAME: %s\nDESCRIPTION: %s\n", cmd_data[i].cmd, cmd_data[i].description);
 }
 
+/*Command Function: history*/
 void show_history(int argc, char *argv[])
 {
 	int i;
 
 	for (i = cur_his + 1; i <= cur_his + HISTORY_COUNT; i++) {
 		if (cmd[i % HISTORY_COUNT][0]) {
-			write(fdout, cmd[i % HISTORY_COUNT], strlen(cmd[i % HISTORY_COUNT]) + 1);
-			write(fdout, next_line, 3);
+			printf("%s\n", cmd[i % HISTORY_COUNT]);
 		}
-	}
-}
-
-int write_blank(int blank_num)
-{
-	char blank[] = " ";
-	int blank_count = 0;
-
-	while (blank_count <= blank_num) {
-		write(fdout, blank, sizeof(blank));
-		blank_count++;
 	}
 }
