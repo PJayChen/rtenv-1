@@ -17,7 +17,7 @@
 char next_line[3] = {'\n','\r','\0'};
 char cmd[HISTORY_COUNT][CMDBUF_SIZE];
 int cur_his=0;
-int fdout;
+//int fdout;
 int fdin;
 extern size_t task_count;
 
@@ -77,7 +77,7 @@ void vShell_task()
 	char *p = NULL;
 	int cmd_count = 0;
 	char q[2] = {'q','\0'};
-	fdout = mq_open("/tmp/mqueue/out", 0);
+	//fdout = mq_open("/tmp/mqueue/out", 0);
 	fdin = open("/dev/tty0/in", 0);
 	
 	for (;; cur_his = (cur_his + 1) % HISTORY_COUNT) {
@@ -174,14 +174,7 @@ void check_keyword(void)
 		}
 	}
 	if (i == CMD_COUNT) {
-		fdprintf(fdout, "%s", argv[0]);
-		fdprintf(fdout, ": command not found");
-		fdprintf(fdout, "%s", next_line);
-		/*
-		write(fdout, argv[0], strlen(argv[0]) + 1);
-		write(fdout, ": command not found", 20);
-		write(fdout, next_line, 3);
-		*/
+		printf("%s: command not found\n", argv[0]);
 	}
 }
 
@@ -346,15 +339,12 @@ void show_echo(int argc, char* argv[])
 
 	for (; i < argc; i++) {
 		printf("%s", argv[i]);
-		//write(fdout, argv[i], strlen(argv[i]) + 1);
 		if (i < argc - 1)
 			printf(" "); 
-			//write(fdout, " ", 2);
 	}
 
 	if (~flag & _n)
 		printf("\n");
-		//write(fdout, next_line, 3);
 }
 
 /*Command Function: man*/
