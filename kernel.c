@@ -10,12 +10,35 @@
 #include "shell.h"
 #include "String.h"
 
+/* Stack struct of user thread, see "Exception entry and return" */
+struct user_thread_stack {
+	unsigned int r4;
+	unsigned int r5;
+	unsigned int r6;
+	unsigned int r7;
+	unsigned int r8;
+	unsigned int r9;
+	unsigned int r10;
+	unsigned int fp;
+	unsigned int _lr;	/* Back to system calls or return exception */
+	unsigned int _r7;	/* Backup from isr */
+	unsigned int r0;
+	unsigned int r1;
+	unsigned int r2;
+	unsigned int r3;
+	unsigned int ip;
+	unsigned int lr;	/* Back to user thread code */
+	unsigned int pc;
+	unsigned int xpsr;
+	unsigned int stack[STACK_SIZE - 18];
+};
+
+
 void *memcpy(void *dest, const void *src, size_t n);
 
 /*Global Variables*/
 size_t task_count = 0;
 struct task_control_block tasks[TASK_LIMIT];
-
 
 /* 
  * pathserver assumes that all files are FIFOs that were registered
