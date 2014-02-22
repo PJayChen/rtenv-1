@@ -285,7 +285,7 @@ void export_envvar(int argc, char *argv[])
 /*Command Function: ps*/
 void show_task_info(int argc, char* argv[])
 {
-	char ps_message[]="PID STATUS PRIORITY";
+	char ps_message[]="PID STATUS \t\tPRIORITY";
 	int ps_message_length = sizeof(ps_message);
 	int task_i;
 	int task;
@@ -293,18 +293,28 @@ void show_task_info(int argc, char* argv[])
 	printf("%s\n", ps_message);
 
 	for (task_i = 0; task_i < task_count; task_i++) {
-		char task_info_pid[2];
-		char task_info_status[2];
-		char task_info_priority[3];
-
-		task_info_pid[0]='0'+tasks[task_i].pid;
-		task_info_pid[1]='\0';
-		task_info_status[0]='0'+tasks[task_i].status;
-		task_info_status[1]='\0';			
-
-		itoa(tasks[task_i].priority, task_info_priority);
-
-		printf("%s   %s     %s\n", task_info_pid, task_info_status, task_info_priority);
+		
+		char *task_info_status;
+		
+		switch(tasks[task_i].status){
+			case TASK_READY:
+				task_info_status = "TASK_READY";
+				break;
+			case TASK_WAIT_READ:
+				task_info_status = "TASK_WAIT_READ";
+				break;
+			case TASK_WAIT_WRITE:
+				task_info_status = "TASK_WAIT_WRITE";
+				break;
+			case TASK_WAIT_INTR:
+				task_info_status = "TASK_WAIT_INTR";
+				break;
+			case TASK_WAIT_TIME:
+				task_info_status = "TASK_WAIT_TIME";
+				break;
+		}
+		
+		printf("%d   %d %s\t%d\n", tasks[task_i].pid, tasks[task_i].status, task_info_status, tasks[task_i].priority);
 	
 	}
 }
