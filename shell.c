@@ -32,6 +32,7 @@ void show_cmd_info(int argc, char *argv[]);
 void show_task_info(int argc, char *argv[]);
 void show_man_page(int argc, char *argv[]);
 void show_history(int argc, char *argv[]);
+void exec_program(int argc, char *argv[]);
 
 /* Enumeration for command types. */
 enum {
@@ -41,8 +42,10 @@ enum {
 	CMD_HISTORY,
 	CMD_MAN,
 	CMD_PS,
+	CMD_EXEC,
 	CMD_COUNT
 } CMD_TYPE;
+
 /* Structure for command handler. */
 typedef struct {
 	char cmd[MAX_CMDNAME + 1];
@@ -56,7 +59,8 @@ const hcmd_entry cmd_data[CMD_COUNT] = {
 	[CMD_HELP] = {.cmd = "help", .func = show_cmd_info, .description = "List all commands you can use."},
 	[CMD_HISTORY] = {.cmd = "history", .func = show_history, .description = "Show latest commands entered."}, 
 	[CMD_MAN] = {.cmd = "man", .func = show_man_page, .description = "Manual pager."},
-	[CMD_PS] = {.cmd = "ps", .func = show_task_info, .description = "List all the processes."}
+	[CMD_PS] = {.cmd = "ps", .func = show_task_info, .description = "List all the processes."},
+	[CMD_EXEC] = {.cmd = "exec", .func = exec_program, .description = "Execute a specific program."}
 };
 
 /* Structure for environment variables. */
@@ -66,7 +70,6 @@ typedef struct {
 } evar_entry;
 evar_entry env_var[MAX_ENVCOUNT];
 int env_count = 0;
-
 
 
 void vShell_task()
@@ -384,4 +387,47 @@ void show_history(int argc, char *argv[])
 			printf("%s\n", cmd[i % HISTORY_COUNT]);
 		}
 	}
+}
+
+/*below is Progeam loader*/
+enum 
+{
+	DISABLE = 0, 
+	ENABLE 
+}exec;
+
+typedef struct {
+	unsigned int fork;
+	void (*func)(void);
+} loader_info;
+
+loader_info l_info = {
+	.fork = DISABLE,
+	.func = NULL
+};
+
+/*Task want be created*/
+void vNew_task(void){
+	printf("New task is running\n");	
+	while(1);
+}
+
+/*responseble for fork specific task*/
+void vProgram_loader_task(void){
+	
+	int fd = open("/dev/tty0/in", 0);
+	write(fd, "\n", 1);
+	while(1){
+		if(l_info.fork){
+			if (!fork()) setpriority(0, PRIORITY_DEFAULT), l_info.func();
+		}
+	}
+}
+
+/*Command Function: exec*/
+void exec_program(int argc, char *argv[])
+{
+	printf("I'm exec_program\n");
+	l_info.func = vNew_task;
+	l_info.fork = ENABLE;
 }
