@@ -409,17 +409,25 @@ loader_info l_info = {
 /*Task want be created*/
 void vNew_task(void){
 	printf("New task is running\n");	
+	int fd = open("/dev/tty0/in", 0);
+	write(fd, "\n", 1);
 	while(1);
+}
+
+void vNew_task1(void){
+	printf("New task1 is running\n");	
+	int fd = open("/dev/tty0/in", 0);
+	write(fd, "\n", 1);
+	while(1);	
 }
 
 /*responseble for fork specific task*/
 void vProgram_loader_task(void){
-	
-	int fd = open("/dev/tty0/in", 0);
-	write(fd, "\n", 1);
+
 	while(1){
 		if(l_info.fork){
 			if (!fork()) setpriority(0, PRIORITY_DEFAULT), l_info.func();
+			l_info.fork = DISABLE;
 		}
 	}
 }
@@ -427,7 +435,15 @@ void vProgram_loader_task(void){
 /*Command Function: exec*/
 void exec_program(int argc, char *argv[])
 {
-	printf("I'm exec_program\n");
-	l_info.func = vNew_task;
-	l_info.fork = ENABLE;
+	printf("Execute program %c \n", *argv[1]);
+	switch(*argv[1]){
+		case '1':
+			l_info.func = vNew_task;
+			l_info.fork = ENABLE;
+			break;
+		case '2':
+			l_info.func = vNew_task1;
+			l_info.fork = ENABLE;
+			break;
+	}
 }
