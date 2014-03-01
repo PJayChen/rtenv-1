@@ -425,9 +425,17 @@ void vNew_task1(void){
 void vProgram_loader_task(void){
 
 	while(1){
+		
 		if(l_info.fork){
-			if (!fork()) setpriority(0, PRIORITY_DEFAULT), l_info.func();
 			l_info.fork = DISABLE;
+
+			if(task_count < TASK_LIMIT){
+				if (!fork()) setpriority(0, PRIORITY_DEFAULT), l_info.func();
+			}else {
+				printf("Error, reach the tasks maximun.\n");
+				int fd = open("/dev/tty0/in", 0);
+				write(fd, "\n", 1);
+			}
 		}
 	}
 }
